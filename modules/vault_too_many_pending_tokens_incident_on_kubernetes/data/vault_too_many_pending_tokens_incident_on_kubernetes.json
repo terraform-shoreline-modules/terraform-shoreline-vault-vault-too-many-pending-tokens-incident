@@ -1,0 +1,130 @@
+{
+  "name": "vault_too_many_pending_tokens_incident_on_kubernetes",
+  "description": "The Vault too many pending tokens incident refers to an issue where the Vault server has too many pending tokens. This can happen when the number of tokens generated exceeds the limit of what the server can handle, causing a backlog of requests. As a result, users may experience difficulty accessing certain resources or functions that require token authentication. This incident type typically requires the attention of a system administrator or engineer to investigate and resolve the underlying cause, such as increasing the token limit or optimizing the token generation process.",
+  "params": [
+    {
+      "name": "VAULT_POD_NAME",
+      "value": ""
+    },
+    {
+      "name": "CASSANDRA_POD_NAME",
+      "value": ""
+    },
+    {
+      "name": "DEPLOYMENT_NAME",
+      "value": ""
+    },
+    {
+      "name": "VAULT_ADDRESS",
+      "value": ""
+    },
+    {
+      "name": "VAULT_CONTAINER_NAME",
+      "value": ""
+    },
+    {
+      "name": "MAX_CONNECTIONS",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Vault too many pending tokens incident on kubernetes\nThe Vault too many pending tokens incident refers to an issue where the Vault server has too many pending tokens. This can happen when the number of tokens generated exceeds the limit of what the server can handle, causing a backlog of requests. As a result, users may experience difficulty accessing certain resources or functions that require token authentication. This incident type typically requires the attention of a system administrator or engineer to investigate and resolve the underlying cause, such as increasing the token limit or optimizing the token generation process."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the status of the Vault pod"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl get pods -n ${NAMESPACE}`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check logs of Vault container"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl logs ${VAULT_POD_NAME} -n ${NAMESPACE} ${VAULT_CONTAINER_NAME}`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the current resource usage of the Vault pod"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl top pods ${VAULT_POD_NAME} -n ${NAMESPACE}`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the current resource usage of the Cassandra pod"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl top pods ${CASSANDRA_POD_NAME} -n ${NAMESPACE}`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the current resource limits and requests for the Vault and Cassandra pods"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | random=1 | limit=1 | invoke_kubectl_describe_pods($VAULT_POD_NAME, $CASSANDRA_POD_NAME, $NAMESPACE)"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## High number of concurrent requests to Vault API that leads to the generation of too many pending tokens."
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | random=1 | limit=1 | invoke_vault_connections($VAULT_POD_NAME, $VAULT_ADDRESS, $VAULT_CONTAINER_NAME, $MAX_CONNECTIONS, $NAMESPACE)"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Increase the token creation rate limit on Vault to reduce the number of pending tokens."
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | random=1 | limit=1 | invoke_update_rate_limit($DEPLOYMENT_NAME, $NAMESPACE)"
+    }
+  ]
+}
